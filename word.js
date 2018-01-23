@@ -7,6 +7,7 @@ class Word {
     this.color = color;
     this.resolution = resolution;
     this.points = this.createSeekers();
+    this.stopped = false;
 
     let overlap = true;
     while (overlap) {
@@ -82,7 +83,7 @@ class Word {
     });
     for (let i = 0; i < ps.length; i++) {
       let target = ps[i];
-      seekers.push(new Seeker(createVector(random(width), random(height)), createVector(0, 0), createVector(target.x, target.y), 1 / map(this.tSize, minSize, maxSize, 1.5 * this.resolution, 1.25 * this.resolution)));
+      seekers.push(new Seeker(createVector(random(width), random(height)), createVector(0, 0), createVector(target.x, target.y), 1 / map(this.tSize, minSize, maxSize, 1.5 * this.resolution, 1.25 * this.resolution), random(minVMax, maxVMax)));
     }
     return seekers;
   }

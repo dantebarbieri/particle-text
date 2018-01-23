@@ -1,5 +1,3 @@
-const max_speed = 25;
-const slowing_distance = 50;
 const time = 3;
 const margin = 7;
 const terms = {
@@ -13,6 +11,9 @@ const minSize = 45;
 const maxSize = 85;
 const minRes = 0.1;
 const maxRes = 0.205;
+
+let minVMax = 20;
+let maxVMax = 35;
 
 let words = [];
 
@@ -33,7 +34,9 @@ function setup() {
   minWeight = min(terms.weights);
   maxWeight = max(terms.weights);
   for (let i = 0; i < terms.words.length; i++) {
-    words.push(new Word(terms.words[i], map(terms.weights[i], minWeight, maxWeight, minSize, maxSize), createVector(random(width / margin, (margin - 1) * width / margin), random(height / margin, (margin - 1) * height / margin)), random(-QUARTER_PI / 2, QUARTER_PI / 2), new Color(), map(terms.weights[i], minWeight, maxWeight, maxRes, minRes)))
+    words.push(new Word(terms.words[i], map(terms.weights[i], minWeight, maxWeight, minSize, maxSize), createVector(random(width / margin, (margin - 1) * width / margin), random(height / margin, (margin - 1) * height / margin)), random(-QUARTER_PI / 2, QUARTER_PI / 2), new Color(), map(terms.weights[i], minWeight, maxWeight, maxRes, minRes)));
+    minVMax += 6;
+    minVMax += 6;
   }
   start = 0;
   // stroke(255);
