@@ -1,0 +1,7 @@
+{
+  "words" : ["Democracy", "America", "President", "Voice", "Responsibility", "Power",
+  "Duty", "Congress", "Representatives", "Useless", "Controversial", "Independence",
+  "Necessary", "Patriotic", "Standing", "Liberty", "Gerrymandering", "Election", "Senate",
+  "Suffering", "Citizen"],
+  "weights" : [4, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+}

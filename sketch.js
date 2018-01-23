@@ -1,36 +1,33 @@
 const time = 3;
 const margin = 7;
-const terms = {
-  "words" : ["Democracy", "America", "President", "Voice", "Responsibility", "Power",
-  "Duty", "Congress", "Representatives", "Useless", "Controversial", "Independence",
-  "Necessary", "Patriotic", "Standing", "Liberty", "Gerrymandering", "Election", "Senate",
-  "Suffering", "Citizen"],
-  "weights" : [4, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-};
-const minSize = 45;
-const maxSize = 85;
-const minRes = 0.1;
-const maxRes = 0.205;
 
+let minRes = 0.1;
+let maxRes = 0.205;
+let minSize = 45;
+let maxSize = 85;
 let minVMax = 20;
 let maxVMax = 35;
 
+let terms;
 let words = [];
 
 let font;
 let t0;
 let d;
 let seekers;
-let w;
 let start;
 
 function preload() {
   font = loadFont('AvenirNextLTPro-Demi.otf');
+  terms = loadJSON('voting_terms.json');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  w = 0;
+  minRes = 185 / width;
+  maxRes = 265 / width;
+  minSize = width / 33;
+  maxSize = width / 17.6;
   minWeight = min(terms.weights);
   maxWeight = max(terms.weights);
   for (let i = 0; i < terms.words.length; i++) {
