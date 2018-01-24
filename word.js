@@ -9,7 +9,8 @@ class Word {
     this.points = this.createSeekers();
     this.stopped = false;
 
-    this.resolveOverlap();
+    this.resolveOverlap(); // Slow Algorithm High Success Rate
+    // this.fastResolveOverlap(); // Fast Algorithm Low Success Rate
 
     this.color.cv = 0.1;
     this.color.update();
@@ -21,9 +22,9 @@ class Word {
     this.color.v(204);
     let toStop = true;
     for (let point of this.points) {
-      if (!this.stopped) {
+      if (!this.stopped && !point.finished) {
         point.update();
-        if (toStop && !point.finished) {
+        if (toStop) {
           toStop = false;
         }
       }
@@ -35,20 +36,14 @@ class Word {
 
   draw() {
     push();
-    translate(width / 2, height / 2);
+    let bbox = font.textBounds(this.text, 0, 0, this.tSize);
+    translate(this.pos.x, this.pos.y - bbox.h / 2);
     rotate(this.rot);
-    translate(-width / 2, -height / 2);
+    translate(-this.pos.x, -this.pos.y + bbox.h / 2);
     fill(this.color.r, this.color.g, this.color.b);
-    // stroke(255);
     for (let point of this.points) {
       point.draw();
     }
-    // noFill();
-    // stroke(0, 0, 0, 204);
-    // strokeWeight(map(this.tSize, 25, 85, 3, 6.5));
-    // textSize(this.tSize);
-    // text(this.text, this.pos.x, this.pos.y);
-    // strokeWeight(1.5);
     pop();
   }
 
@@ -68,40 +63,26 @@ class Word {
   resolveOverlap() {
     let overlap = true;
     let bboxPoints = font.textBounds(this.text, 0, 0, this.tSize);
-    let pointsCenter = createVector(this.pos.x + bboxPoints.w, this.pos.y);
     while (overlap) {
+      let pointsCenter = createVector(this.pos.x, this.pos.y - bboxPoints.h / 2);
       let toRedraw = false;
       scanning: {
         for (let i = 0; i < words.length; i++) {
           let bboxDots = font.textBounds(words[i].text, 0, 0, words[i].tSize);
-          let dotsCenter = createVector(words[i].pos.x + bboxDots.w, words[i].pos.y);
-          for (let point of this.points) {
-            let realPoint = p5.Vector.sub(point.target, pointsCenter);
-            let x0 = realPoint.x * cos(this.rot) - realPoint.y * sin(this.rot);
-            let y0 = realPoint.x * sin(this.rot) + realPoint.y * cos(this.rot);
-            realPoint.x = x0;
-            realPoint.y = y0;
+          let dotsCenter = createVector(words[i].pos.x, words[i].pos.y - bboxDots.h / 2);
+          for (let j = 0; j < this.points.length; j++) {
+            let realPoint = this.points[j].target.copy();
+            realPoint.sub(pointsCenter);
+            realPoint.rotate(this.rot);
             realPoint.add(pointsCenter);
-            for (let dot of words[i].points){
-              // let realDot = p5.Vector.add((p5.Vector.sub(dot.target, dotsCenter)).rotate(words[i].rot), dotsCenter);
-              let realDot = p5.Vector.sub(dot.target, dotsCenter);
-              let x1 = realDot.x * cos(this.rot) - realDot.y * sin(this.rot);
-              let y1 = realDot.x * sin(this.rot) + realDot.y * cos(this.rot);
-              realDot.x = x1;
-              realDot.y = y1;
+            for (let k = 0; k < words[i].points.length; k++) {
+              let realDot = words[i].points[k].target.copy();
+              realDot.sub(dotsCenter);
+              realDot.rotate(words[i].rot);
               realDot.add(dotsCenter);
-              let distance = (p5.Vector.sub(realPoint, realDot)).mag();
-              if(distance <= (point.rad + dot.rad) / 2){
-                // console.log("Conflict Between:");
-                // console.log("Words:");
-                // console.log(this);
-                // console.log("and");
-                // console.log(words[i]);
-                // console.log("Points:");
-                // console.log(realPoint);
-                // console.log("and")
-                // console.log(realDot);
-                // console.log("Resolving...");
+              let displacement = p5.Vector.sub(realPoint, realDot);
+              let distance = displacement.mag();
+              if (distance <= (this.points[j].rad + words[i].points[k].rad) / 2) {
                 toRedraw = true;
                 break scanning;
               }
@@ -109,12 +90,45 @@ class Word {
           }
         }
       }
-      if(toRedraw){
+      if (toRedraw) {
         this.pos = createVector(random(width / margin, (margin - 1) * width / margin), random(height / margin, (margin - 1) * height / margin));
         this.rot = random(-QUARTER_PI / 2, QUARTER_PI / 2);
         this.points = this.createSeekers();
-      }else{
+        console.log("\"" + this.text + "\" is being Redrawn");
+      } else {
         overlap = false;
+        console.log("\"" + this.text + "\" Placed");
+      }
+    }
+  }
+
+  fastResolveOverlap() {
+    let overlap = true;
+    let bboxPoints = font.textBounds(this.text, 0, 0, this.tSize);
+    while (overlap) {
+      let pointsCenter = createVector(this.pos.x, this.pos.y - bboxPoints.h / 2);
+      let toRedraw = false;
+      scanning: {
+        for (let i = 0; i < words.length; i++) {
+          let bboxDots = font.textBounds(words[i].text, 0, 0, words[i].tSize);
+          let dotsCenter = createVector(words[i].pos.x, words[i].pos.y - bboxDots.h / 2);
+          let displacement = p5.Vector.sub(pointsCenter, dotsCenter);
+          let distance = displacement.mag();
+          if (distance <= (max(bboxPoints.w, bboxPoints.h) + max(bboxDots.w, bboxDots.h)) / 2) {
+            // console.log(distance + " <= " + (max(bboxPoints.w, bboxPoints.h) + max(bboxDots.w, bboxDots.h)) / 2);
+            toRedraw = true;
+            break scanning;
+          }
+        }
+      }
+      if (toRedraw) {
+        this.pos = createVector(random(width / margin, (margin - 1) * width / margin), random(height / margin, (margin - 1) * height / margin));
+        this.rot = random(-QUARTER_PI / 2, QUARTER_PI / 2);
+        this.points = this.createSeekers();
+        console.log("\"" + this.text + "\" is being Redrawn");
+      } else {
+        overlap = false;
+        console.log("\"" + this.text + "\" Placed");
       }
     }
   }

@@ -1,5 +1,6 @@
 const time = 3;
 const margin = 7;
+let dbug = false;
 
 let minRes = 0.1;
 let maxRes = 0.205;
@@ -44,23 +45,44 @@ function setup() {
   // textAlign(CENTER);
   // t0 = new Date().getTime();
   // background(26.5);
+  rectMode(CENTER);
 }
 
 function draw() {
   background(26.5, 26.5, 26.5, 177.5);
+  if (dbug) {
+    for (let i = 0; i < words.length; i++) {
+      for (let j = 0; j < words[i].points.length; j++) {
+        let bbox = font.textBounds(words[i].text, 0, 0, words[i].tSize);
+        let t = words[i].points[j].target.copy();
+        let o = createVector(words[i].pos.x, words[i].pos.y - bbox.h / 2);
+        ellipse(o.x, o.y, map(mouseX, 0, width, 0, 75));
+        t.sub(o);
+        t.rotate(map(mouseY, 0, height, 0, 2 * words[i].rot));
+        t.add(o);
+        ellipse(t.x, t.y, map(mouseX, 0, width, 0, 2 * words[i].points[j].rad));
+        push();
+        noFill();
+        stroke(255);
+        strokeWeight(2);
+        rect(words[i].pos.x, words[i].pos.y - bbox.h / 2, bbox.w, bbox.h);
+        pop();
+      }
+    }
+  }
   // if (new Date().getTime() >= t0 + time * 1000) {
   //   // console.log(t0);
   //   t0 = new Date().getTime();
   //   start++;
   // }
-  if(start < words.length){
+  if (start < words.length) {
     words[start].update();
     // words[start].draw();
-    if(words[start].stopped){
+    if (words[start].stopped) {
       start++;
     }
   }
-  for(let i = 0; i < min(words.length, start + 1); i++){
+  for (let i = 0; i < min(words.length, start + 1); i++) {
     words[i].draw();
   }
 }
